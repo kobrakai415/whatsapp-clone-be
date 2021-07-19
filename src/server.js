@@ -5,14 +5,23 @@ import listEndpoints from "express-list-endpoints";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import usersRouter from "./services/users.js";
+import { unAuthorizedHandler, notFoundErrorHandler, badRequestErrorHandler, forbiddenErrorHandler, catchAllErrorHandler } from "./errorHandlers.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 const server = createServer(app);
 const io = new Server(server, { allowEIO3: true });
 
 app.use("/users", usersRouter);
+
+app.use(unAuthorizedHandler);
+app.use(notFoundErrorHandler);
+app.use(badRequestErrorHandler);
+app.use(forbiddenErrorHandler);
+app.use(catchAllErrorHandler);
 
 const port = process.env.PORT;
 

@@ -8,13 +8,10 @@ export const JWTAuthMiddleware = async (req, res, next) => {
   } else {
     try {
       const token = req.headers.authorization.replace("Bearer ", "");
-      console.log(token);
 
       const content = await verifyToken(token);
-      console.log(content);
 
       const user = await UserModel.findById(content._id);
-      console.log(user);
 
       if (user) {
         req.user = user;
