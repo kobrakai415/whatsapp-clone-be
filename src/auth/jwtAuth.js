@@ -1,5 +1,6 @@
 import createError from "http-errors";
 import UserModel from "../models/users/index.js";
+import {verifyToken} from "./tools.js"
 
 export const JWTAuthMiddleware = async (req, res, next) => {
   if (!req.headers.authorization) {
