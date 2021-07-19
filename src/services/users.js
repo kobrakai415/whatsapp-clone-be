@@ -44,7 +44,7 @@ usersRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
-usersRouter.get("/me", async (req, res, next) => {
+usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
     console.log(req.user);
     res.send(req.user);
@@ -62,10 +62,24 @@ usersRouter.delete("/me", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
-usersRouter.put("/me", JWTAuthMiddleware, async (req, res, next) => {
+usersRouter.post("/me/setUsername", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const myProfile = await UserModel.findByIdAndUpdate(req.user._id, req.body, { runValidators: true, new: true });
-    res.send(myProfile);
+    const user = await UserModel.findById(req.user._id);
+    user.username = req.body.username;
+    await user.save();
+    res.send(user.username);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+usersRouter.put("/me/status", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const user = await UserModel.findById(req.user._id);
+    user.status = req.body.status;
+    await user.save();
+    res.send(user.status);
   } catch (error) {
     console.log(error);
     next(error);
@@ -81,12 +95,12 @@ const cloudinaryStorage = new CloudinaryStorage({
 
 const upload = multer({ storage: cloudinaryStorage }).single("avatar");
 
-usersRouter.post("/me/uploadAvatar", upload, async (req, res, next) => {
+usersRouter.post("/me/uploadAvatar", upload, JWTAuthMiddleware, async (req, res, next) => {
   try {
     const user = await UserModel.findById(req.user._id);
     user.avatar = req.file.path;
-    await experience.save();
-    res.send(req.file.path);
+    await user.save();
+    res.send(user.avatar);
   } catch (error) {
     next(error);
   }
