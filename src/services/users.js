@@ -26,6 +26,8 @@ usersRouter.post("/login", async (req, res, next) => {
     if (user) {
       const accessToken = await JWTAuthenticate(user);
       res.send({ accessToken });
+      res.cookie("accessToken", req.user.tokens.accessToken, {httpOnly: true}) 
+      res.send({ accessToken })
     } else {
       next(createError(401));
     }

@@ -25,7 +25,7 @@ app.use(catchAllErrorHandler);
 
 const port = process.env.PORT;
 
-mongoose.connect(process.env.MONGO_CONNECTION, { useNewUrlParser: true }).then(() => {
+mongoose.connect(process.env.MONGO_CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
   console.log("Connected to mongo");
   server.listen(port, () => {
     console.table(listEndpoints(app));
