@@ -11,17 +11,18 @@ const app = express();
 app.use(cors())
 app.use(express.json())
 
-
 const server = createServer(app);
 const io = new Server(server, { allowEIO3: true })
 
 let onlineUsers = []
 
+
 // Add "event listeners" on your socket when it's connecting
 io.on("connection", socket => {
     console.log(`${socket.id} connected`)
+    
     socket.on("setUsername", async ({ username, room }) => {
-        onlineUsers.push({ username: username, id: socket.id, room })
+        onlineUsers.push({ username: username, userId: socket.id, room })
 
         //.emit - echoing back to itself
         socket.emit("loggedin")
@@ -31,7 +32,6 @@ io.on("connection", socket => {
 
         socket.join(socket.id)
         socket.join(room)
-
         
         const _room_ = await RoomModel.findOne({ name: room })
         if (!_room_) {

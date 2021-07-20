@@ -2,22 +2,11 @@ import mongoose from "mongoose"
 
 const MessageSchema = new mongoose.Schema(
     {
-        text: {
-            type: String,
-            required: true
-        },
-        id: {
-            type: String,
-            required: true
-        },
-        sender: {
-            type: String,
-            required: true
-        },
-        timestamp: {
-            type: Date,
-            required: true
-        }
+        sender: { type: String, required: true },
+        senderId: { type: String, required: true },
+        content: { type: String, required: true },
+        contentType: { type: String, required: true, enum: ["text", "picture", "video"] },
+        timestamp: { type: Date, required: true }
     }
 )
 
