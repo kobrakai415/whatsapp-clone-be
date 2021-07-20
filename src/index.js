@@ -92,7 +92,7 @@ app.use('/', chatRouter)
 const port = 3030
 
 mongoose
-    .connect(process.env.ATLAS_URL, { useNewUrlParser: true })
+    .connect(process.env.MONGO_CONNECTION, { useNewUrlParser: true })
     .then(() => {
         console.log("Connected to mongo")
         // Listen using the httpServer -
