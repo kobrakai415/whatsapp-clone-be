@@ -10,14 +10,13 @@ import RoomModel from "./models/Room/index.js"
 const app = express();
 app.use(cors())
 app.use(express.json())
-
 const server = createServer(app);
 const io = new Server(server, { allowEIO3: true })
 
 let onlineUsers = []
 
-
 // Add "event listeners" on your socket when it's connecting
+
 io.on("connection", socket => {
     console.log(`${socket.id} connected`)
     
