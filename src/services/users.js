@@ -67,6 +67,18 @@ usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
+usersRouter.get("/search/:query", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const users = await UserModel.find({ username: { $regex: req.params.query } });
+    const otherUsers = users.filter((user) => user._id.toString() !== req.user._id.toString());
+
+    res.send(otherUsers);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
 usersRouter.delete("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
     await req.user.deleteOne();
