@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt"
+const { Schema } = mongoose
 
 const userSchema = new mongoose.Schema(
   {
@@ -8,6 +9,7 @@ const userSchema = new mongoose.Schema(
     username: { type: String },
     avatar: { type: String },
     status: { type: String },
+    rooms: [{ type: Schema.Types.ObjectId, ref: "room" }],
   },
   { timestamps: true }
 );

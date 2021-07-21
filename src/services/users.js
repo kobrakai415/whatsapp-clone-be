@@ -5,6 +5,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { JWTAuthenticate } from "../auth/tools.js";
 import { JWTAuthMiddleware } from "../auth/jwtAuth.js";
+import createError from "http-errors"
 
 const usersRouter = express.Router();
 
@@ -25,7 +26,7 @@ usersRouter.post("/login", async (req, res, next) => {
     const user = await UserModel.checkCredentials(email, password);
     if (user) {
       const accessToken = await JWTAuthenticate(user);
-      res.send({ accessToken });
+      res.send({ accessToken, "username": user.username });
     } else {
       next(createError(401));
     }
@@ -46,7 +47,7 @@ usersRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
 
 usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    console.log(req.user);
+    // console.log(req.user);
     res.send(req.user);
   } catch (error) {
     console.log(error);
@@ -85,6 +86,7 @@ usersRouter.put("/me/status", JWTAuthMiddleware, async (req, res, next) => {
     next(error);
   }
 });
+
 
 const cloudinaryStorage = new CloudinaryStorage({
   cloudinary,
