@@ -9,7 +9,6 @@ const userSchema = new mongoose.Schema(
     username: { type: String },
     avatar: { type: String, default: "https://picsum.photos/70/70", },
     status: { type: String },
-    rooms: [{ type: Schema.Types.ObjectId, ref: "room" }],
   },
   { timestamps: true }
 );

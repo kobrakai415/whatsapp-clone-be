@@ -23,51 +23,58 @@ const io = new Server(server, { allowEIO3: true });
 app.use("/users", usersRouter);
 app.use('/', chatRouter)
 
+
 io.on('connection', (socket) => {
-  socket.on("setUser", async ({ username, token }) => {
-    const _room_ = await RoomModel.findOne({ name: username })
-    if (!_room_) {
-      try {
-        const newRoom = new RoomModel({ name: username })
-        const { _id } = await newRoom.save()
-        socket.join(username)
-        // Create his or her room in the users Collection
-        const userRooms = user.rooms.filter(r => r.toString() === _id.toString())
-        if (userRooms.length === 0) {
-          user.rooms.push(_id.toString())
-          await user.save()
-        }
-        console.log('user.rooms:', user.rooms)
-      } catch (error) {
-        console.log(error)
-      }
-    } else {
-      socket.join(username)
-    }
-    
-    console.log(`-------------------------`);
-    console.log(`${socket.id} connected`);
-    socket.id = "123"
-    socket.join("Room1")
-    const { rooms } = socket
+  socket.on("sendMessage", async ({ message, room }) => {
 
-    const roomData = []
-    for (let room of rooms.values()) {
-      roomData.push({ "title": room })
-    }
-
-    socket.emit("roomData", roomData)
+    console.log('message:', message)
+    console.log('room:', room)
+    await RoomModel.findOneAndUpdate({ title: room }, {
+      $push: { chatHistory: message }
+    })
+    socket.to(room).emit("message", message)
   })
 })
 
-// socket.on("sendMessage", async ({ message, room }) => {
+// io.on('connection', (socket) => {
 
-//   await RoomModel.findOneAndUpdate({ name: room }, {
-//     $push: { chatHistory: message }
+//   socket.on("setUser", async ({ username, token }) => {
+//     const _room_ = await RoomModel.findOne({ name: username })
+//     if (!_room_) {
+//       try {
+//         const newRoom = new RoomModel({ name: username })
+//         const { _id } = await newRoom.save()
+//         socket.join(username)
+//         // Create his or her room in the users Collection
+//         const userRooms = user.rooms.filter(r => r.toString() === _id.toString())
+//         if (userRooms.length === 0) {
+//           user.rooms.push(_id.toString())
+//           await user.save()
+//         }
+//         console.log('user.rooms:', user.rooms)
+//       } catch (error) {
+//         console.log(error)
+//       }
+//     } else {
+//       socket.join(username)
+//     }
+
+//     console.log(`-------------------------`);
+//     console.log(`${socket.id} connected`);
+//     socket.id = "123"
+//     socket.join("Room1")
+//     const { rooms } = socket
+
+//     const roomData = []
+//     for (let room of rooms.values()) {
+//       roomData.push({ "title": room })
+//     }
+
+//     socket.emit("roomData", roomData)
 //   })
-
-//   socket.to(room).emit("message", message)
 // })
+
+
 
 
 

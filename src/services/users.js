@@ -6,6 +6,7 @@ import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { JWTAuthenticate, refreshTokens } from "../auth/tools.js";
 import { JWTAuthMiddleware } from "../auth/jwtAuth.js";
 import createError from "http-errors";
+import RoomModel from "../models/Room/index.js"
 
 const usersRouter = express.Router();
 
@@ -119,10 +120,6 @@ const cloudinaryStorage = new CloudinaryStorage({
   },
 });
 
-// GET /me/chats
-
-// const chatRooms = await RoomModel.find({ members: req.user._id }, { select: [ NO CHAT HISTORY ] })
-
 const upload = multer({ storage: cloudinaryStorage }).single("avatar");
 
 usersRouter.post("/me/uploadAvatar", upload, JWTAuthMiddleware, async (req, res, next) => {
@@ -135,5 +132,22 @@ usersRouter.post("/me/uploadAvatar", upload, JWTAuthMiddleware, async (req, res,
     next(error);
   }
 });
+
+
+// GET /me/chats
+
+// const chatRooms = await RoomModel.find({ members: req.user._id }, { select: [ NO CHAT HISTORY ] })
+
+usersRouter.get("/me/chats", JWTAuthMiddleware, async (req, res) => {
+  console.log('req.user._id:', req.user._id)
+  const rooms = await RoomModel.find()
+  const myChats = rooms.filter((item) => (item.members.includes(req.user._id)))
+  const chats = []
+  myChats.forEach((item) => (chats.push({ "title": item.title })))
+  console.log('myChats:', myChats)
+  console.log('---------------')
+  console.log('chats:', chats)
+  res.status(200).send(chats)
+})
 
 export default usersRouter;
