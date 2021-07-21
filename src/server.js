@@ -21,9 +21,47 @@ const io = new Server(server, { allowEIO3: true });
 app.use("/users", usersRouter);
 
 io.on('connection', (socket) => {
-  
+  console.log(`-------------------------`);
+  console.log(`${socket.id} connected`);
+  socket.join("testRoom")
+  const { rooms } = socket
 
-  // console.log(`${socket.id} connected`);
+  const roomData = []
+  for (let room of rooms.values()) {
+    roomData.push({ "title": room })
+  }
+
+  socket.emit("roomData", roomData)
+
+  socket.on("chatHistoryOfSelectedRoom", (room) => {
+    console.log('room:', room)
+
+
+    const chatHistory1 = [{ position: 'left', type: 'text', text: 'Kaivan text1', date: new Date(), }, { position: 'right', type: 'text', text: 'Mohammad text1', date: new Date(), }]
+    const chatHistory2 = [{ position: 'left', type: 'text', text: 'chatHistory2 test1', date: new Date(), }, { position: 'right', type: 'text', text: 'chatHistory2 test2', date: new Date(), }]
+
+    let chatHistory = []
+    if (room === "testRoom") {
+      chatHistory = chatHistory1
+    } else {
+      chatHistory = chatHistory2
+    }
+
+    socket.emit("chatHistory", { chatHistory, room })
+  })
+
+
+  // socket.on("sendMessage", async ({ message, room }) => {
+
+  //   await RoomModel.findOneAndUpdate({ name: room }, {
+  //     $push: { chatHistory: message }
+  //   })
+
+  //   socket.to(room).emit("message", message)
+  // })
+
+
+
   // // Create his or her room in the Room Collection
   // socket.on("validation", async ({ token, username }) => {
   //   const _room_ = await RoomModel.findOne({ name: username })
