@@ -81,7 +81,7 @@ usersRouter.post("/me/setUsername", JWTAuthMiddleware, async (req, res, next) =>
     user.username = req.body.username;
     await user.save();
     console.log(user);
-    res.send(user.username);
+    res.send(user);
   } catch (error) {
     console.log(error);
     next(error);
@@ -93,7 +93,7 @@ usersRouter.put("/me/status", JWTAuthMiddleware, async (req, res, next) => {
     const user = await UserModel.findById(req.user._id);
     user.status = req.body.status;
     await user.save();
-    res.send(user.status);
+    res.send(user);
   } catch (error) {
     console.log(error);
     next(error);
