@@ -95,6 +95,10 @@ const cloudinaryStorage = new CloudinaryStorage({
   },
 });
 
+// GET /me/chats
+
+// const chatRooms = await RoomModel.find({ members: req.user._id }, { select: [ NO CHAT HISTORY ] })
+
 const upload = multer({ storage: cloudinaryStorage }).single("avatar");
 
 usersRouter.post("/me/uploadAvatar", upload, JWTAuthMiddleware, async (req, res, next) => {
