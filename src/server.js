@@ -22,8 +22,11 @@ app.use("/users", usersRouter);
 
 // Add "event listeners" on your socket when it's connecting
 io.on("connection", socket => {
+  console.log('***************** Socket *******************')
   socket.on("validation", async ({ token, username }) => {
     // VALIDATION:
+    console.log('token:', token)
+    console.log('username:', username)
     if (token && username) {
       const content = await verifyToken(token);
       const user = await UserModel.findById(content._id);
@@ -53,17 +56,30 @@ io.on("connection", socket => {
         }
 
         const userByRooms = await UserModel.find().populate("rooms")
-        console.log('userByRooms.rooms[0] :', userByRooms[0].rooms)
+        console.log('rooms in DB:', userByRooms[0].rooms)
         socket.emit("rooms", { rooms: userByRooms[0].rooms })
+
+        console.log('socket.rooms:', socket.rooms)
+        console.log('socket.id:', socket.id)
+        console.log(`**************************************`)
+
+        //   socket.on("sendMessage", async ({ message, room }) => {
+
+        //     await RoomModel.findOneAndUpdate({ name: room }, {
+        //         $push: { chatHistory: message }
+        //     })
+
+        //     socket.to(room).emit("message", message)
+        // })
+
       }
     } else {
       console.log('validation failed')
       socket.emit("validationFailed")
     }
-
-    // console.log('socket.id:', socket.id)
-    // console.log(`---------------------`)
-    // console.log('socket.rooms:', socket.rooms)
+    socket.on("disconnect", () => {
+      console.log(`${socket.id} disconnect`)
+    })
   })
 })
 

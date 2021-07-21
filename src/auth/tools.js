@@ -16,7 +16,7 @@ const generateJWT = (payload) =>
 export const verifyToken = (token) =>
   new Promise((resolve, reject) =>
     jwt.verify(token, process.env.JWT_SECRET, (err, token) => {
-      console.log(process.env.JWT_SECRET);
+      // console.log(process.env.JWT_SECRET);
         if (err) reject(err);
         resolve(token);
     })

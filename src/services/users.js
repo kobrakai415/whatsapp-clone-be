@@ -26,7 +26,7 @@ usersRouter.post("/login", async (req, res, next) => {
     const user = await UserModel.checkCredentials(email, password);
     if (user) {
       const accessToken = await JWTAuthenticate(user);
-      res.send({ accessToken });
+      res.send({ accessToken, "username": user.username });
     } else {
       next(createError(401));
     }
@@ -87,6 +87,15 @@ usersRouter.put("/me/status", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
+
+const { CLOUDINARY_NAME, CLOUDINARY_KEY, CLOUDINARY_SECRET } = process.env;
+
+cloudinary.config({
+  cloud_name: CLOUDINARY_NAME,
+  api_key: CLOUDINARY_KEY,
+  api_secret: CLOUDINARY_SECRET,
+});
+
 const cloudinaryStorage = new CloudinaryStorage({
   cloudinary,
   params: {
@@ -102,15 +111,6 @@ usersRouter.post("/me/uploadAvatar", upload, JWTAuthMiddleware, async (req, res,
     user.avatar = req.file.path;
     await user.save();
     res.send(user.avatar);
-  } catch (error) {
-    next(error);
-  }
-});
-
-usersRouter.get("/test", async (req, res, next) => {
-  try {
-    const userByRooms = await UserModel.find().populate("rooms")
-    res.send(userByRooms);
   } catch (error) {
     next(error);
   }
