@@ -3,9 +3,9 @@ import UserModel from "../models/users/index.js";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import { JWTAuthenticate } from "../auth/tools.js";
+import { JWTAuthenticate, refreshTokens } from "../auth/tools.js";
 import { JWTAuthMiddleware } from "../auth/jwtAuth.js";
-import createError from "http-errors"
+import createError from "http-errors";
 
 const usersRouter = express.Router();
 
@@ -25,11 +25,23 @@ usersRouter.post("/login", async (req, res, next) => {
     const { email, password } = req.body;
     const user = await UserModel.checkCredentials(email, password);
     if (user) {
-      const accessToken = await JWTAuthenticate(user);
-      res.send({ accessToken, "username": user.username });
+      const { accessToken, refreshToken } = await JWTAuthenticate(user);
+
+      res.cookie("accessToken", req.user.tokens.accessToken, { httpOnly: true });
+      res.cookie("refreshToken", req.user.tokens.refreshToken, { httpOnly: true });
+      res.send({ accessToken, refreshToken });
     } else {
       next(createError(401));
     }
+  } catch (error) {
+    next(error);
+  }
+});
+
+usersRouter.post("/refreshToken", async (req, res, next) => {
+  try {
+    const { newAccessToken, newRefreshToken } = await refreshTokens(req.cookies.actualRefreshToken);
+    res.send({ newAccessToken, newRefreshToken });
   } catch (error) {
     next(error);
   }
@@ -55,6 +67,18 @@ usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
+usersRouter.get("/search/:query", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const users = await UserModel.find({ username: { $regex: req.params.query } });
+    const otherUsers = users.filter((user) => user._id.toString() !== req.user._id.toString());
+
+    res.send(otherUsers);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
 usersRouter.delete("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
     await req.user.deleteOne();
@@ -68,7 +92,8 @@ usersRouter.post("/me/setUsername", JWTAuthMiddleware, async (req, res, next) =>
     const user = await UserModel.findById(req.user._id);
     user.username = req.body.username;
     await user.save();
-    res.send(user.username);
+    console.log(user);
+    res.send(user);
   } catch (error) {
     console.log(error);
     next(error);
@@ -80,13 +105,12 @@ usersRouter.put("/me/status", JWTAuthMiddleware, async (req, res, next) => {
     const user = await UserModel.findById(req.user._id);
     user.status = req.body.status;
     await user.save();
-    res.send(user.status);
+    res.send(user);
   } catch (error) {
     console.log(error);
     next(error);
   }
 });
-
 
 const cloudinaryStorage = new CloudinaryStorage({
   cloudinary,
