@@ -20,68 +20,112 @@ const io = new Server(server, { allowEIO3: true });
 
 app.use("/users", usersRouter);
 
+io.on('connection', (socket) => {
+  
+
+  // console.log(`${socket.id} connected`);
+  // // Create his or her room in the Room Collection
+  // socket.on("validation", async ({ token, username }) => {
+  //   const _room_ = await RoomModel.findOne({ name: username })
+  //   if (!_room_) {
+  //     try {
+  //       const newRoom = new RoomModel({ name: username })
+  //       const { _id } = await newRoom.save()
+  //       socket.join(username)
+  //       // Create his or her room in the users Collection
+  //       const userRooms = user.rooms.filter(r => r.toString() === _id.toString())
+  //       if (userRooms.length === 0) {
+  //         user.rooms.push(_id.toString())
+  //         await user.save()
+  //       }
+  //       console.log('user.rooms:', user.rooms)
+  //     } catch (error) {
+  //       console.log(error)
+  //     }
+  //   } else {
+  //     socket.join(username)
+  //   }
+  // })
+
+  // socket.on("sendMessage", async ({ message, room }) => {
+
+  //   await RoomModel.findOneAndUpdate({ name: room }, {
+  //     $push: { chatHistory: message }
+  //   })
+
+  //   socket.to(room).emit("message", message)
+  // })
+
+  // socket.on('disconnect', () => {
+  //   console.log('user disconnected');
+  // });
+
+  // socket.to(room).emit("message", message)
+
+});
+
 // Add "event listeners" on your socket when it's connecting
-io.on("connection", socket => {
-  console.log('***************** Socket *******************')
-  socket.on("validation", async ({ token, username }) => {
-    // VALIDATION:
-    console.log('token:', token)
-    console.log('username:', username)
-    if (token && username) {
-      const content = await verifyToken(token);
-      const user = await UserModel.findById(content._id);
-      if (user.username === username) {
-        console.log('Socket is connected and validatoin is OK')
-        socket.id = user._id
+// io.on("connection", socket => {
+//   console.log('***************** Socket *******************')
+//   socket.on("validation", async ({ token, username }) => {
+//     // VALIDATION:
+//     console.log('token:', token)
+//     console.log('username:', username)
+//     if (token && username) {
+//       const content = await verifyToken(token);
+//       const user = await UserModel.findById(content._id);
+//       if (user.username === username) {
+//         console.log('Socket is connected and validatoin is OK')
+//         socket.id = user._id
 
-        // Create his or her room in the Room Collection
-        const _room_ = await RoomModel.findOne({ name: username })
-        if (!_room_) {
-          try {
-            const newRoom = new RoomModel({ name: username })
-            const { _id } = await newRoom.save()
-            socket.join(username)
-            // Create his or her room in the users Collection
-            const userRooms = user.rooms.filter(r => r.toString() === _id.toString())
-            if (userRooms.length === 0) {
-              user.rooms.push(_id.toString())
-              await user.save()
-            }
-            console.log('user.rooms:', user.rooms)
-          } catch (error) {
-            console.log(error)
-          }
-        } else {
-          socket.join(username)
-        }
+//         // Create his or her room in the Room Collection
+//         const _room_ = await RoomModel.findOne({ name: username })
+//         if (!_room_) {
+//           try {
+//             const newRoom = new RoomModel({ name: username })
+//             const { _id } = await newRoom.save()
+//             socket.join(username)
+//             // Create his or her room in the users Collection
+//             const userRooms = user.rooms.filter(r => r.toString() === _id.toString())
+//             if (userRooms.length === 0) {
+//               user.rooms.push(_id.toString())
+//               await user.save()
+//             }
+//             console.log('user.rooms:', user.rooms)
+//           } catch (error) {
+//             console.log(error)
+//           }
+//         } else {
+//           socket.join(username)
+//         }
 
-        const userByRooms = await UserModel.find().populate("rooms")
-        console.log('rooms in DB:', userByRooms[0].rooms)
-        socket.emit("rooms", { rooms: userByRooms[0].rooms })
+//         const userByRooms = await UserModel.find().populate("rooms")
+//         console.log('rooms in DB:', userByRooms[0].rooms)
+//         socket.emit("rooms", { rooms: userByRooms[0].rooms })
 
-        console.log('socket.rooms:', socket.rooms)
-        console.log('socket.id:', socket.id)
-        console.log(`**************************************`)
+//         console.log('socket.rooms:', socket.rooms)
+//         console.log('socket.id:', socket.id)
+//         console.log(`**************************************`)
 
-        //   socket.on("sendMessage", async ({ message, room }) => {
+//         //   socket.on("sendMessage", async ({ message, room }) => {
 
-        //     await RoomModel.findOneAndUpdate({ name: room }, {
-        //         $push: { chatHistory: message }
-        //     })
+//         //     await RoomModel.findOneAndUpdate({ name: room }, {
+//         //         $push: { chatHistory: message }
+//         //     })
 
-        //     socket.to(room).emit("message", message)
-        // })
+//         //     socket.to(room).emit("message", message)
+//         // })
 
-      }
-    } else {
-      console.log('validation failed')
-      socket.emit("validationFailed")
-    }
-    socket.on("disconnect", () => {
-      console.log(`${socket.id} disconnect`)
-    })
-  })
-})
+//       }
+//     } else {
+//       console.log('validation failed')
+//       socket.emit("validationFailed")
+//     }
+//     socket.on("disconnect", () => {
+//       console.log(`${socket.id} disconnect`)
+//     })
+//   })
+// })
 
 
 app.use(unAuthorizedHandler);
