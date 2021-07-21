@@ -3,7 +3,7 @@ import UserModel from "../models/users/index.js";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import { JWTAuthenticate } from "../auth/tools.js";
+import { JWTAuthenticate, refreshTokens } from "../auth/tools.js";
 import { JWTAuthMiddleware } from "../auth/jwtAuth.js";
 import createError from "http-errors"
 
@@ -25,11 +25,23 @@ usersRouter.post("/login", async (req, res, next) => {
     const { email, password } = req.body;
     const user = await UserModel.checkCredentials(email, password);
     if (user) {
-      const accessToken = await JWTAuthenticate(user);
-      res.send({ accessToken, "username": user.username });
+      const { accessToken, refreshToken } = await JWTAuthenticate(user);
+
+      res.cookie("accessToken", req.user.tokens.accessToken, { httpOnly: true });
+      res.cookie("refreshToken", req.user.tokens.refreshToken, { httpOnly: true });
+      res.send({ accessToken, refreshToken });
     } else {
       next(createError(401));
     }
+  } catch (error) {
+    next(error);
+  }
+});
+
+usersRouter.post("/refreshToken", async (req, res, next) => {
+  try {
+    const { newAccessToken, newRefreshToken } = await refreshTokens(req.cookies.actualRefreshToken);
+    res.send({ newAccessToken, newRefreshToken });
   } catch (error) {
     next(error);
   }
