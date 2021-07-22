@@ -28,9 +28,9 @@ usersRouter.post("/login", async (req, res, next) => {
     if (user) {
       const { accessToken, refreshToken } = await JWTAuthenticate(user);
 
-      res.cookie("accessToken", req.user.tokens.accessToken, { httpOnly: true });
-      res.cookie("refreshToken", req.user.tokens.refreshToken, { httpOnly: true });
-      res.send({ accessToken, refreshToken });
+      // res.cookie("accessToken", req.user.tokens.accessToken, { httpOnly: true });
+      // res.cookie("refreshToken", req.user.tokens.refreshToken, { httpOnly: true });
+      res.send({ accessToken, refreshToken, username: user.username });
     } else {
       next(createError(401));
     }
@@ -70,10 +70,14 @@ usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
 
 usersRouter.get("/search/:query", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const users = await UserModel.find({ username: { $regex: req.params.query } });
-    const otherUsers = users.filter((user) => user._id.toString() !== req.user._id.toString());
+    // const users = await UserModel.find({ username: { $regex: req.params.query } });
+    // const otherUsers = users.filter((user) => user._id.toString() !== req.user._id.toString());
 
-    res.send(otherUsers);
+    // res.send(otherUsers);
+
+    const users = await UserModel.find({ username: { $regex: req.params.query } });
+
+    res.send(users);
   } catch (error) {
     console.log(error);
     next(error);
@@ -144,9 +148,6 @@ usersRouter.get("/me/chats", JWTAuthMiddleware, async (req, res) => {
   const myChats = rooms.filter((item) => (item.members.includes(req.user._id)))
   const chats = []
   myChats.forEach((item) => (chats.push({ "title": item.title })))
-  console.log('myChats:', myChats)
-  console.log('---------------')
-  console.log('chats:', chats)
   res.status(200).send(chats)
 })
 
