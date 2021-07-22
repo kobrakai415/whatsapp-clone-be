@@ -28,8 +28,9 @@ usersRouter.post("/login", async (req, res, next) => {
     if (user) {
       const { accessToken, refreshToken } = await JWTAuthenticate(user);
 
-      res.cookie("accessToken", req.user.tokens.accessToken, { httpOnly: true });
-      res.cookie("refreshToken", req.user.tokens.refreshToken, { httpOnly: true });
+      // res.cookie("accessToken", req.user.tokens.accessToken, { httpOnly: true });
+      // res.cookie("refreshToken", req.user.tokens.refreshToken, { httpOnly: true });
+
       res.send({ accessToken, refreshToken });
     } else {
       next(createError(401));
@@ -70,7 +71,12 @@ usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
 
 usersRouter.get("/search/:query", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const users = await UserModel.find({ username: { $regex: req.params.query } });
+    const regex = new RegExp(req.params.query, "i")
+    console.log(regex)
+    const users = await UserModel.find({ username: { $regex: regex } })
+
+    console.log(req.params.query)
+    console.log(users)
     const otherUsers = users.filter((user) => user._id.toString() !== req.user._id.toString());
 
     res.send(otherUsers);
