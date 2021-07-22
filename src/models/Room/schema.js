@@ -3,10 +3,7 @@ import MessageSchema from "../Message/schema.js"
 const { Schema } = mongoose
 
 const RoomSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true
-    },
+    
     chatHistory: {
         type: [MessageSchema],
         required: true,

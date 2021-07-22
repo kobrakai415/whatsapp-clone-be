@@ -145,11 +145,12 @@ usersRouter.post("/me/uploadAvatar", upload, JWTAuthMiddleware, async (req, res,
 
 usersRouter.get("/me/chats", JWTAuthMiddleware, async (req, res) => {
   console.log('req.user._id:', req.user._id)
-  const rooms = await RoomModel.find()
-  const myChats = rooms.filter((item) => (item.members.includes(req.user._id)))
-  const chats = []
-  myChats.forEach((item) => (chats.push({ "title": item.title })))
-  res.status(200).send(chats)
+  const rooms = await RoomModel.find({ members: req.user._id }).populate("members")
+  // console.log('rooms:', rooms)
+  // const myChats = rooms.filter((item) => (item.members.includes(req.user._id)))
+  // const chats = []
+  // myChats.forEach((item) => (chats.push({ "title": item.title })))
+  res.status(200).send(rooms)
 })
 
 export default usersRouter;
