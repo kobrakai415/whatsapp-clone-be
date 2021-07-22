@@ -30,8 +30,7 @@ usersRouter.post("/login", async (req, res, next) => {
 
       // res.cookie("accessToken", req.user.tokens.accessToken, { httpOnly: true });
       // res.cookie("refreshToken", req.user.tokens.refreshToken, { httpOnly: true });
-
-      res.send({ accessToken, refreshToken });
+      res.send({ accessToken, refreshToken, username: user.username });
     } else {
       next(createError(401));
     }
@@ -79,7 +78,7 @@ usersRouter.get("/search/:query", JWTAuthMiddleware, async (req, res, next) => {
     console.log(users)
     const otherUsers = users.filter((user) => user._id.toString() !== req.user._id.toString());
 
-    res.send(otherUsers);
+    res.send(users);
   } catch (error) {
     console.log(error);
     next(error);
@@ -150,9 +149,6 @@ usersRouter.get("/me/chats", JWTAuthMiddleware, async (req, res) => {
   const myChats = rooms.filter((item) => (item.members.includes(req.user._id)))
   const chats = []
   myChats.forEach((item) => (chats.push({ "title": item.title })))
-  console.log('myChats:', myChats)
-  console.log('---------------')
-  console.log('chats:', chats)
   res.status(200).send(chats)
 })
 
