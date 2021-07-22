@@ -29,12 +29,14 @@ io.on('connection', (socket) => {
     socket.join(room)
   })
 
-  socket.on("sendMessage", async ({ message, room }) => {
-    socket.join(room)
-    await RoomModel.findOneAndUpdate({ title: room }, {
+  socket.on("sendMessage", async ({ message, roomId }) => {
+    console.log('message:', message)
+    console.log('roomId:', roomId)
+    socket.join(roomId)
+    await RoomModel.findByIdAndUpdate(roomId, {
       $push: { chatHistory: message }
     })
-    socket.to(room).emit("message", message)
+    socket.to(roomId).emit("message", message)
   })
   socket.on("disconnect", () => {
     console.log("disconnected")
