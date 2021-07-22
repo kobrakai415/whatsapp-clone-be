@@ -5,33 +5,41 @@ import { JWTAuthMiddleware } from "../auth/jwtAuth.js";
 
 const chatRouter = express.Router()
 
-chatRouter.post('/room', async (req, res) => {
-    const room = new RoomModel(req.body)
-    await room.save()
+// chatRouter.post('/room', async (req, res) => {
+//     const room = new RoomModel(req.body)
+//     await room.save()
 
-    res.status(201).send(room)
-})
+//     res.status(201).send(room)
+// })
 
 chatRouter.get("/room/history/:title", async (req, res) => {
     const room = await RoomModel.findOne({ title: req.params.title })
     res.status(200).send({ chatHistory: room.chatHistory })
 })
 
-chatRouter.get("/room/user/:title", JWTAuthMiddleware, async (req, res) => {
-    console.log('req.params.title:', req.params.title)
-    console.log('-----------------')
-    const user = UserModel.find({ username: req.params.title })
-    const room = await RoomModel.findOne({ title: req.params.title })
-    if (room) {
-        res.status(200).send({ chatHistory: room.chatHistory })
+chatRouter.get("/room/user/:id", JWTAuthMiddleware, async (req, res) => {
+
+    console.log('req.params.id:', req.params.id)
+    console.log('req.user._id:', req.user._id)
+
+    const room = await RoomModel.findOne({ $and: [{ members: req.params.id }, { members: req.user._id }] }).populate("members")
+    console.log('room:', room)
+
+    if (room !== null) {
+        res.status(200).send(room)
     } else {
         const emptyRoom = {
-            title: req.params.title,
-            members: [user._id, req.user._id]
+
+            members: [req.params.id, req.user._id]
         }
-        const room = new RoomModel(emptyRoom)
-        await room.save()
-        res.status(200).send({ chatHistory: room.chatHistory, title: room.title })
+        const _room = new RoomModel(emptyRoom)
+        await _room.save()
+
+        const _room_ = await RoomModel.findOne({ $and: [{ members: req.params.id }, { members: req.user._id }] }).populate("members")
+        console.log('------------------')
+        console.log('_room_:', _room_)
+        console.log('------------------')
+        res.status(200).send(_room_)
     }
 
 })
