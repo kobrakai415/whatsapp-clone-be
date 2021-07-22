@@ -70,12 +70,13 @@ usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
 
 usersRouter.get("/search/:query", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    // const users = await UserModel.find({ username: { $regex: req.params.query } });
-    // const otherUsers = users.filter((user) => user._id.toString() !== req.user._id.toString());
+    const regex = new RegExp(req.params.query, "i")
+    console.log(regex)
+    const users = await UserModel.find({ username: { $regex: regex } })
 
-    // res.send(otherUsers);
-
-    const users = await UserModel.find({ username: { $regex: req.params.query } });
+    console.log(req.params.query)
+    console.log(users)
+    const otherUsers = users.filter((user) => user._id.toString() !== req.user._id.toString());
 
     res.send(users);
   } catch (error) {
