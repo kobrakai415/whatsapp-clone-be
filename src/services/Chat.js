@@ -10,8 +10,8 @@ chatRouter.post('/room', async (req, res) => {
     res.status(201).send(room)
 })
 
-chatRouter.get("/room/:name", async (req, res) => {
-    const room = await RoomModel.findOne({ name: req.params.name })
+chatRouter.get("/room/:title", async (req, res) => {
+    const room = await RoomModel.findOne({ title: req.params.title })
     res.status(200).send({ chatHistory: room.chatHistory })
 })
 
