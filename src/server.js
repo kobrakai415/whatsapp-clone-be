@@ -43,28 +43,36 @@ export const sockets = {}
 
 
 io.on('connection', (socket) => {
+  console.log('socket.id:', socket.id)
 
   socket.on('did-connect', async (userId) => {
+    console.log('-------------')
+    console.log('userId:', userId.id)
     sockets[userId] = socket
+    try {
+      const rooms = await RoomModel.find({ members: userId.id })
+      
+      console.log('rooms:', rooms)
+      for (let room of rooms) socket.join(room._id.toString())
+      console.log('-------------')
 
-    const rooms = await RoomModel.find({ members: userId })
-
-    for (let room of rooms) socket.join(room._id.toString())
-
+    } catch (error) {
+      console.log('error:', error)
+    }
   })
 
   socket.on("sendMessage", async ({ message, roomId }) => {
-    console.log('message:', message)
-    console.log('roomId:', roomId)
+    // console.log('message:', message)
+    // console.log('roomId:', roomId)
     socket.join(roomId)
-    console.log('socket.rooms:', socket.rooms)
+    // console.log('socket.rooms:', socket.rooms)
     const room = await RoomModel.findById(roomId)
 
     await RoomModel.findOneAndUpdate({ _id: roomId }, {
       $push: { chatHistory: message }
     })
     socket.to(roomId).emit("message", message)
-    console.log('----------')
+    // console.log('----------')
     // socket.to(roomId).emit("receive-message", message, roomId);
     // socket.emit("message-delivered", true);
   })
@@ -73,87 +81,6 @@ io.on('connection', (socket) => {
     console.log("disconnected")
   })
 })
-
-// io.on('connection', (socket) => {
-
-//   socket.on("setUser", async ({ username, token }) => {
-//     const _room_ = await RoomModel.findOne({ name: username })
-//     if (!_room_) {
-//       try {
-//         const newRoom = new RoomModel({ name: username })
-//         const { _id } = await newRoom.save()
-//         socket.join(username)
-//         // Create his or her room in the users Collection
-//         const userRooms = user.rooms.filter(r => r.toString() === _id.toString())
-//         if (userRooms.length === 0) {
-//           user.rooms.push(_id.toString())
-//           await user.save()
-//         }
-//         console.log('user.rooms:', user.rooms)
-//       } catch (error) {
-//         console.log(error)
-//       }
-//     } else {
-//       socket.join(username)
-//     }
-
-//     console.log(`-------------------------`);
-//     console.log(`${socket.id} connected`);
-//     socket.id = "123"
-//     socket.join("Room1")
-//     const { rooms } = socket
-
-//     const roomData = []
-//     for (let room of rooms.values()) {
-//       roomData.push({ "title": room })
-//     }
-
-//     socket.emit("roomData", roomData)
-//   })
-// })
-
-
-
-
-
-// // Create his or her room in the Room Collection
-// socket.on("validation", async ({ token, username }) => {
-//   const _room_ = await RoomModel.findOne({ name: username })
-//   if (!_room_) {
-//     try {
-//       const newRoom = new RoomModel({ name: username })
-//       const { _id } = await newRoom.save()
-//       socket.join(username)
-//       // Create his or her room in the users Collection
-//       const userRooms = user.rooms.filter(r => r.toString() === _id.toString())
-//       if (userRooms.length === 0) {
-//         user.rooms.push(_id.toString())
-//         await user.save()
-//       }
-//       console.log('user.rooms:', user.rooms)
-//     } catch (error) {
-//       console.log(error)
-//     }
-//   } else {
-//     socket.join(username)
-//   }
-// })
-
-// socket.on("sendMessage", async ({ message, room }) => {
-
-//   await RoomModel.findOneAndUpdate({ name: room }, {
-//     $push: { chatHistory: message }
-//   })
-
-//   socket.to(room).emit("message", message)
-// })
-
-// socket.on('disconnect', () => {
-//   console.log('user disconnected');
-// });
-
-// socket.to(room).emit("message", message)
-
 
 // Add "event listeners" on your socket when it's connecting
 // io.on("connection", socket => {
