@@ -25,59 +25,34 @@ app.use('/', chatRouter)
 
 export const sockets = {}
 
-// POST 
-// /users/me/chat/:otheruuid
-
-/**
- * const myId = req.user._id.toString90
- * 
- * const uuid = req.params.uuid
- * 
- * const newRoom = new Roommodel({})
- * 
- * sockets[myid].join(newroom._id)
- * sockets[uuid].join(newroom._id)
- * 
- * 
- */
-
 
 io.on('connection', (socket) => {
-  console.log('socket.id:', socket.id)
-
   socket.on('did-connect', async (userId) => {
-    console.log('-------------')
-    console.log('userId:', userId.id)
     sockets[userId] = socket
     try {
-      const rooms = await RoomModel.find({ members: userId.id })
-      
-      console.log('rooms:', rooms)
+      const rooms = await RoomModel.find({ members: userId })
       for (let room of rooms) socket.join(room._id.toString())
-      console.log('-------------')
-
     } catch (error) {
       console.log('error:', error)
     }
   })
 
+  socket.on("joinRoom", async (roomId) => {
+    socket.join(roomId);
+  });
+
   socket.on("sendMessage", async ({ message, roomId }) => {
-    // console.log('message:', message)
-    // console.log('roomId:', roomId)
     socket.join(roomId)
-    // console.log('socket.rooms:', socket.rooms)
     const room = await RoomModel.findById(roomId)
 
     await RoomModel.findOneAndUpdate({ _id: roomId }, {
       $push: { chatHistory: message }
     })
     socket.to(roomId).emit("message", message)
-    // console.log('----------')
-    // socket.to(roomId).emit("receive-message", message, roomId);
-    // socket.emit("message-delivered", true);
   })
 
-  socket.on("disconnect", () => {
+  socket.on("disconnect", (userId) => {
+    delete sockets[userId]
     console.log("disconnected")
   })
 })
