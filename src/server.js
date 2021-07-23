@@ -39,7 +39,7 @@ io.on('connection', (socket) => {
       $push: { chatHistory: message }
     })
     socket.to(roomId).emit("message", message)
-    console.log('----------:', ----------)
+    console.log('----------')
     // socket.to(roomId).emit("receive-message", message, roomId);
     // socket.emit("message-delivered", true);
   })
