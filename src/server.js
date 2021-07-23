@@ -25,17 +25,25 @@ app.use('/', chatRouter)
 
 
 io.on('connection', (socket) => {
-  socket.on("joinMyRoom", async ({ username, room }) => {
-    socket.join(room)
-  })
 
-  socket.on("sendMessage", async ({ message, room }) => {
-    socket.join(room)
-    await RoomModel.findOneAndUpdate({ title: room }, {
+  socket.join(socket.id)
+
+  // socket.join(room)
+
+  socket.on("sendMessage", async ({ message, roomId }) => {
+    console.log('message:', message)
+    console.log('roomId:', roomId)
+    socket.join(roomId)
+    console.log('socket.rooms:', socket.rooms)
+    await RoomModel.findOneAndUpdate({ _id: roomId }, {
       $push: { chatHistory: message }
     })
-    socket.to(room).emit("message", message)
+    socket.to(roomId).emit("message", message)
+    console.log('----------')
+    // socket.to(roomId).emit("receive-message", message, roomId);
+    // socket.emit("message-delivered", true);
   })
+  
   socket.on("disconnect", () => {
     console.log("disconnected")
   })
