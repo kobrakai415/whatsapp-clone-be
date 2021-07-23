@@ -23,18 +23,43 @@ const io = new Server(server, { allowEIO3: true });
 app.use("/users", usersRouter);
 app.use('/', chatRouter)
 
+export const sockets = {}
+
+// POST 
+// /users/me/chat/:otheruuid
+
+/**
+ * const myId = req.user._id.toString90
+ * 
+ * const uuid = req.params.uuid
+ * 
+ * const newRoom = new Roommodel({})
+ * 
+ * sockets[myid].join(newroom._id)
+ * sockets[uuid].join(newroom._id)
+ * 
+ * 
+ */
+
 
 io.on('connection', (socket) => {
 
-  socket.join(socket.id)
+  socket.on('did-connect', async (userId) => {
+    sockets[userId] = socket
 
-  // socket.join(room)
+    const rooms = await RoomModel.find({ members: userId })
+
+    for (let room of rooms) socket.join(room._id.toString())
+
+  })
 
   socket.on("sendMessage", async ({ message, roomId }) => {
     console.log('message:', message)
     console.log('roomId:', roomId)
     socket.join(roomId)
     console.log('socket.rooms:', socket.rooms)
+    const room = await RoomModel.findById(roomId)
+
     await RoomModel.findOneAndUpdate({ _id: roomId }, {
       $push: { chatHistory: message }
     })
@@ -43,7 +68,7 @@ io.on('connection', (socket) => {
     // socket.to(roomId).emit("receive-message", message, roomId);
     // socket.emit("message-delivered", true);
   })
-  
+
   socket.on("disconnect", () => {
     console.log("disconnected")
   })
