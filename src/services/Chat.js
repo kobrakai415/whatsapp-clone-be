@@ -12,8 +12,8 @@ const chatRouter = express.Router()
 //     res.status(201).send(room)
 // })
 
-chatRouter.get("/room/history/:title", async (req, res) => {
-    const room = await RoomModel.findOne({ title: req.params.title })
+chatRouter.get("/room/history/:id", async (req, res) => {
+    const room = await RoomModel.findById(req.params.id)
     res.status(200).send({ chatHistory: room.chatHistory })
 })
 
