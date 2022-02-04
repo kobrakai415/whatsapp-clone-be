@@ -25,7 +25,6 @@ app.use('/', chatRouter)
 
 export const sockets = {}
 
-
 io.on('connection', (socket) => {
   socket.on('did-connect', async (userId) => {
     sockets[userId] = socket
